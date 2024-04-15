@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
-	_ "github.com/microsoft/go-mssqldb"
+	_ "github.com/denisenkom/go-mssqldb"
 )
 
 func main() {
@@ -17,21 +18,29 @@ func main() {
 	}
 	defer conn.Close()
 
-	stmt, err := conn.Prepare("select 1, 'abc'")
+	// Escribir la consulta SQL para insertar valores en la tabla alumno
+	insertQuery := "INSERT INTO alumno (legajo, NyA, FechaIng, FechaNac, Mail) VALUES (?, ?, ?, ?, ?)"
+
+	// Preparar la consulta de inserción
+	insertStmt, err := conn.Prepare(insertQuery)
 	if err != nil {
 		log.Fatal("Prepare failed:", err.Error())
 	}
-	defer stmt.Close()
+	defer insertStmt.Close()
 
-	row := stmt.QueryRow()
-	var somenumber int64
-	var somechars string
-	err = row.Scan(&somenumber, &somechars)
+	// Ejecutar la consulta de inserción con valores de ejemplo
+	legajo := 12345
+	nya := "Juan Pérez"
+	fechaIng := time.Now().Format("2006-01-02") // Formato YYYY-MM-DD
+	fechaNac := "1990-01-01"                    // Formato YYYY-MM-DD
+	mail := "juanperez@example.com"
+
+	_, err = insertStmt.Exec(legajo, nya, fechaIng, fechaNac, mail)
 	if err != nil {
-		log.Fatal("Scan failed:", err.Error())
+		log.Fatal("Insert failed:", err.Error())
 	}
-	fmt.Printf("somenumber:%d\n", somenumber)
-	fmt.Printf("somechars:%s\n", somechars)
+
+	fmt.Println("Valores insertados correctamente en la tabla alumno.")
 
 	fmt.Printf("bye\n")
 }

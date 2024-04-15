@@ -8,7 +8,7 @@ import (
 var (
 	server   = flag.String("server", "127.0.0.1", "the database server")
 	port     = flag.Int("port", 1433, "the database port")
-	database = flag.String("database", "offsetRecorder", "the database name")
+	database = flag.String("database", "repaso_final", "the database name")
 	/*
 		No se usan porque ingresamos con la autentifiacion de windows
 		////////////////////////////////////////////////////////////////
