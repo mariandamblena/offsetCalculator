@@ -1,5 +1,6 @@
 package main
 
+/*
 import (
 	"fmt"
 	"log"
@@ -54,3 +55,4 @@ func main() {
 
 	fmt.Println("Coeficiente de la regresión (slope):", beta[0])
 }
+*/

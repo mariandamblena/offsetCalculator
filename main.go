@@ -4,13 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )
 
+var selector int
+
 func main() {
-	parseFlags()
 
 	conn, err := sql.Open("mssql", connectionString())
 	if err != nil {
@@ -18,29 +18,29 @@ func main() {
 	}
 	defer conn.Close()
 
-	// Escribir la consulta SQL para insertar valores en la tabla alumno
-	insertQuery := "INSERT INTO alumno (legajo, NyA, FechaIng, FechaNac, Mail) VALUES (?, ?, ?, ?, ?)"
+	fmt.Println("Database connection established")
 
-	// Preparar la consulta de inserción
-	insertStmt, err := conn.Prepare(insertQuery)
-	if err != nil {
-		log.Fatal("Prepare failed:", err.Error())
-	}
-	defer insertStmt.Close()
+	fmt.Println("Welcome to the Offset Calculator, what action you want to perform? \n [1] Register a new sensor \n [2] Upload sensor datalogs \n [3] Calculate Offset \n [4] Run a Modbus datalogging (coming soon)")
 
-	// Ejecutar la consulta de inserción con valores de ejemplo
-	legajo := 12345
-	nya := "Juan Pérez"
-	fechaIng := time.Now().Format("2006-01-02") // Formato YYYY-MM-DD
-	fechaNac := "1990-01-01"                    // Formato YYYY-MM-DD
-	mail := "juanperez@example.com"
-
-	_, err = insertStmt.Exec(legajo, nya, fechaIng, fechaNac, mail)
-	if err != nil {
-		log.Fatal("Insert failed:", err.Error())
+	_, scanErr := fmt.Scanln(&selector)
+	if scanErr != nil {
+		log.Fatal("Error reading input:", scanErr)
 	}
 
-	fmt.Println("Valores insertados correctamente en la tabla alumno.")
-
-	fmt.Printf("bye\n")
+	switch selector {
+	case 1:
+		fmt.Println("Registering a new sensor...")
+		// Call a function to handle registering a new sensor.
+	case 2:
+		fmt.Println("Uploading sensor datalogs...")
+		// Call a function to handle uploading sensor datalogs.
+	case 3:
+		fmt.Println("Calculating Offset...")
+		// Call a function to handle calculating offset.
+	case 4:
+		fmt.Println("Running Modbus datalogging (coming soon)...")
+		// Provide a message indicating that this feature is not yet implemented.
+	default:
+		fmt.Println("Invalid option selected.")
+	}
 }
