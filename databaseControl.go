@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
 	"flag"
 	"fmt"
 	"log"
+	"os"
 )
 
 var (
@@ -20,6 +22,15 @@ var (
 	*/
 )
 
+/*
+Se usa en caso de autentificarse con usuario
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+func connectionString() string {
+	return fmt.Sprintf("server=%s;database=%s;user id=%s;password=%s;port=%d", *server, *database, *user, *password, *port)
+}
+*/
+
 func parseFlags() {
 	flag.Parse()
 }
@@ -28,7 +39,10 @@ func connectionString() string {
 	return fmt.Sprintf("server=%s;database=%s;integrated security=true;port=%d", *server, *database, *port)
 }
 
-func queryTipoSensor(connectionString, query string) ([]int, []string, error) {
+func queryTipoSensor(connectionString string) ([]int, []string, error) {
+	// Cadena de consulta SQL
+	query := "SELECT id, Descripcion FROM TipoSensor"
+
 	// Conectar a la base de datos SQL Server
 	db, err := sql.Open("mssql", connectionString)
 	if err != nil {
@@ -76,14 +90,16 @@ func registerNewSensor(connectionString string) error {
 	var id int
 	var descripcion string
 
+	reader := bufio.NewReader(os.Stdin)
+
 	fmt.Println("Enter sensor ID:")
-	_, err := fmt.Scanln(&id)
+	_, err := fmt.Fscanln(reader, &id)
 	if err != nil {
 		return err
 	}
 
 	fmt.Println("Enter sensor description:")
-	_, err = fmt.Scanln(&descripcion)
+	_, err = fmt.Fscanln(reader, &descripcion)
 	if err != nil {
 		return err
 	}
@@ -107,12 +123,3 @@ func registerNewSensor(connectionString string) error {
 	fmt.Println("Sensor registered successfully")
 	return nil
 }
-
-/*
-Se usa en caso de autentificarse con usuario
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-func connectionString() string {
-	return fmt.Sprintf("server=%s;database=%s;user id=%s;password=%s;port=%d", *server, *database, *user, *password, *port)
-}
-*/

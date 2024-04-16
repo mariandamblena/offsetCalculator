@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/stat/regression"
+	stats "gonum.org/v1/gonum/stat"
 )
 
 func main() {
@@ -20,7 +19,7 @@ func main() {
 
 	// Paso 3: Cálculo del offset medio
 	var offsetMean float64
-	if !floats.EqualLength(sensor1, sensor2) {
+	if !stats.EqualLength(sensor1, sensor2) {
 		log.Fatal("Los conjuntos de datos no tienen la misma longitud")
 	}
 	for i := range sensor1 {
@@ -40,12 +39,12 @@ func main() {
 
 	// Ajuste de la regresión lineal
 	var (
-		reg  regression.Regression
+		reg  stats.Regression
 		beta = []float64{0}
 	)
 	reg.Init(nil, 1, nil)
 	for i, xv := range x {
-		reg.Train(regression.DataPoint(y[i], []float64{xv}))
+		reg.Train(stats.regression.DataPoint(y[i], []float64{xv}))
 	}
 	ok := reg.Solve()
 	if !ok {
@@ -55,4 +54,5 @@ func main() {
 
 	fmt.Println("Coeficiente de la regresión (slope):", beta[0])
 }
+
 */
