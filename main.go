@@ -30,7 +30,8 @@ func main() {
 	switch selector {
 	case 1:
 		fmt.Println("Registering a new sensor...")
-		// Call a function to handle registering a new sensor.
+		// Call a function to query what sensor are registered.
+		// if is required, call a function to ask for serial number and sersor description to register en sql database
 	case 2:
 		fmt.Println("Uploading sensor datalogs...")
 		// Call a function to handle uploading sensor datalogs.
