@@ -34,3 +34,8 @@ CREATE TABLE Datalog (
     FOREIGN KEY (SensorSerialNumber) REFERENCES Sensor(SerialNumber)
 );
 go
+INSERT INTO TipoSensor (id, Descripcion)
+VALUES
+    (1, 'Sensor temperatura y humedad Vaisala HMP110 Modbus RTU'),
+    (2, 'Sensor CO2 Vaisala GMP251 Modbus RTU'),
+    (3, 'Datalogger TESTO 176H1');
