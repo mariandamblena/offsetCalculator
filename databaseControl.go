@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"log"
 )
 
 var (
@@ -27,7 +28,7 @@ func connectionString() string {
 	return fmt.Sprintf("server=%s;database=%s;integrated security=true;port=%d", *server, *database, *port)
 }
 
-func queries(connectionString, query string) ([]int, []string, error) {
+func queryTipoSensor(connectionString, query string) ([]int, []string, error) {
 	// Conectar a la base de datos SQL Server
 	db, err := sql.Open("mssql", connectionString)
 	if err != nil {
@@ -62,6 +63,49 @@ func queries(connectionString, query string) ([]int, []string, error) {
 	}
 
 	return ids, descripciones, nil
+}
+
+func printResultsTipoSensor(ids []int, descripciones []string) {
+	// Imprimir los resultados
+	for i := 0; i < len(ids); i++ {
+		log.Printf("ID: %d, Descripcion: %s\n", ids[i], descripciones[i])
+	}
+}
+
+func registerNewSensor(connectionString string) error {
+	var id int
+	var descripcion string
+
+	fmt.Println("Enter sensor ID:")
+	_, err := fmt.Scanln(&id)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Enter sensor description:")
+	_, err = fmt.Scanln(&descripcion)
+	if err != nil {
+		return err
+	}
+
+	// Consulta SQL para insertar el nuevo sensor
+	query := fmt.Sprintf("INSERT INTO TipoSensor (id, Descripcion) VALUES (%d, '%s')", id, descripcion)
+
+	// Conectar a la base de datos SQL Server
+	db, err := sql.Open("mssql", connectionString)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	// Ejecutar la consulta SQL
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Sensor registered successfully")
+	return nil
 }
 
 /*

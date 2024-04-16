@@ -30,8 +30,20 @@ func main() {
 	switch selector {
 	case 1:
 		fmt.Println("Registering a new sensor...")
-		// Call a function to query what sensor are registered.
+		// Llamar a la función queryTipoSensor para saber que sensores estan registrados
+
+		query := "SELECT id, Descripcion FROM TipoSensor"
+
+		ids, descripciones, err := queryTipoSensor(connectionString(), query)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Imprimir los resultados
+
+		printResultsTipoSensor(ids, descripciones)
 		// if is required, call a function to ask for serial number and sersor description to register en sql database
+
 	case 2:
 		fmt.Println("Uploading sensor datalogs...")
 		// Call a function to handle uploading sensor datalogs.

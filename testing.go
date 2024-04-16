@@ -7,10 +7,10 @@ func test() {
 	connectionString := connectionString()
 
 	// Consulta SQL para seleccionar todos los registros de la tabla TipoSensor
-	query := "SELECT id, Descripcion FROM TipoSensor"
+	queries := "SELECT id, Descripcion FROM TipoSensor"
 
 	// Llamar a la función queries
-	ids, descripciones, err := queries(connectionString, query)
+	ids, descripciones, err := queryTipoSensor(connectionString, queries)
 	if err != nil {
 		log.Fatal(err)
 	}
