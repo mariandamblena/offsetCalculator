@@ -34,6 +34,7 @@ func main() {
 			fmt.Println("What action do you want to perform? \n [1] Register new sensor in Stock \n [2] Add a new Sensor Type \n [3] Sensor list \n [4] Delete sensor \n [5] Delete sensor type \n ")
 
 			var case1Selector int8
+
 			_, scanErr := fmt.Scanln(&case1Selector)
 			if scanErr != nil {
 				log.Fatal("Error reading input:", scanErr)
@@ -59,15 +60,20 @@ func main() {
 			case 3:
 				fmt.Print("\033[H\033[2J")
 				fmt.Println("Sensor list...")
-				// Mostrar los tipos de sensores registrados
-				ids, descripciones, errQuery := queryTipoSensor(connectionString())
+				// Retrieve sensor information
+				SNs, descripciones, ids, errQuery := querySensorView(connectionString())
 				if errQuery != nil {
 					log.Fatal(errQuery)
 				}
-				printResultsTipoSensor(ids, descripciones)
+
+				// Display sensor information
+				for i := range SNs {
+					fmt.Printf("Serial Number: %s, Sensor Type: %s, Sensor type Id: %d\n", SNs[i], descripciones[i], ids[i])
+				}
 
 			case 4:
 				fmt.Print("\033[H\033[2J")
+
 			case 5:
 				fmt.Print("\033[H\033[2J")
 			default:

@@ -79,44 +79,46 @@ func queryTipoSensor(connectionString string) ([]int, []string, error) {
 	return ids, descripciones, nil
 }
 
-func querySensorView(connectionString string) ([]int, []string, error) {
-	// Cadena de consulta SQL
-	query := "SELECT * FROM SensorView"
+func querySensorView(connectionString string) ([]string, []string, []int, error) {
+	// SQL query string
+	query := "SELECT SerialNumber, SensorType, TipoSensorId FROM SensorView"
 
-	// Conectar a la base de datos SQL Server
+	// Connect to the SQL Server database
 	db, err := sql.Open("mssql", connectionString)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	defer db.Close()
 
-	// Ejecutar la consulta SQL
+	// Execute the SQL query
 	rows, err := db.Query(query)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	defer rows.Close()
 
-	// Almacenar los resultados en slices
-	var ids []int
-	var descripciones []string
+	// Store the results in slices
+	var SN []string
+	var sensorTypes []string
+	var tipoSensorIDs []int
 
 	for rows.Next() {
-		var id int
-		var descripcion string
-		if err := rows.Scan(&id, &descripcion); err != nil {
-			return nil, nil, err
+		var serialNumber string
+		var sensorType string
+		var tipoSensorID int
+		if err := rows.Scan(&serialNumber, &sensorType, &tipoSensorID); err != nil {
+			return nil, nil, nil, err
 		}
-		ids = append(ids, id)
-		descripciones = append(descripciones, descripcion)
+		SN = append(SN, serialNumber)
+		sensorTypes = append(sensorTypes, sensorType)
+		tipoSensorIDs = append(tipoSensorIDs, tipoSensorID)
 	}
 
-	// Verificar errores de iteración
 	if err := rows.Err(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	return ids, descripciones, nil
+	return SN, sensorTypes, tipoSensorIDs, nil
 }
 
 func printResultsTipoSensor(ids []int, descripciones []string) {
