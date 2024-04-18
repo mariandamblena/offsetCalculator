@@ -79,6 +79,46 @@ func queryTipoSensor(connectionString string) ([]int, []string, error) {
 	return ids, descripciones, nil
 }
 
+func querySensorView(connectionString string) ([]int, []string, error) {
+	// Cadena de consulta SQL
+	query := "SELECT * FROM SensorView"
+
+	// Conectar a la base de datos SQL Server
+	db, err := sql.Open("mssql", connectionString)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer db.Close()
+
+	// Ejecutar la consulta SQL
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer rows.Close()
+
+	// Almacenar los resultados en slices
+	var ids []int
+	var descripciones []string
+
+	for rows.Next() {
+		var id int
+		var descripcion string
+		if err := rows.Scan(&id, &descripcion); err != nil {
+			return nil, nil, err
+		}
+		ids = append(ids, id)
+		descripciones = append(descripciones, descripcion)
+	}
+
+	// Verificar errores de iteración
+	if err := rows.Err(); err != nil {
+		return nil, nil, err
+	}
+
+	return ids, descripciones, nil
+}
+
 func printResultsTipoSensor(ids []int, descripciones []string) {
 	// Imprimir los resultados
 	for i := 0; i < len(ids); i++ {
@@ -86,7 +126,7 @@ func printResultsTipoSensor(ids []int, descripciones []string) {
 	}
 }
 
-func registerNewSensor(connectionString string) error {
+func registerNewSensorType(connectionString string) error {
 	var id int
 	var descripcion string
 
@@ -116,6 +156,84 @@ func registerNewSensor(connectionString string) error {
 
 	// Ejecutar la consulta SQL
 	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Sensor registered successfully")
+	return nil
+}
+
+func uploadDatatoSensor(connectionString string) error {
+	var id int
+	var descripcion string
+
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Println("Select sensor ID:")
+	_, err := fmt.Fscanln(reader, &id)
+	if err != nil {
+		return err
+	}
+
+	// Consulta SQL para insertar el nuevo sensor
+	query := fmt.Sprintf("INSERT INTO TipoSensor (id, Descripcion) VALUES (%d, '%s')", id, descripcion)
+
+	// Conectar a la base de datos SQL Server
+	db, err := sql.Open("mssql", connectionString)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	// Ejecutar la consulta SQL
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Sensor registered successfully")
+	return nil
+}
+
+func registerNewSensor(connectionString string) error {
+	var SN string
+	var sensorTypeID int
+
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Println("Enter sensor Serial number:")
+	_, err := fmt.Fscanln(reader, &SN)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("We have the following types of sensors:")
+	ids, descriptions, errQuery := queryTipoSensor(connectionString)
+	if errQuery != nil {
+		log.Fatal(errQuery)
+	}
+	printResultsTipoSensor(ids, descriptions)
+	fmt.Println("")
+
+	fmt.Println("Enter sensor type ID:")
+	_, err = fmt.Fscanln(reader, &sensorTypeID)
+	if err != nil {
+		return err
+	}
+
+	// SQL query to insert the new sensor
+	registerQuery := fmt.Sprintf("INSERT INTO Sensor (SerialNumber, TipoSensorId) VALUES ('%s', %d)", SN, sensorTypeID)
+
+	// Connect to the SQL Server database
+	db, err := sql.Open("mssql", connectionString)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	// Execute the SQL query
+	_, err = db.Exec(registerQuery)
 	if err != nil {
 		return err
 	}

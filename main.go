@@ -8,19 +8,19 @@ import (
 	_ "github.com/denisenkom/go-mssqldb"
 )
 
-var selector int
+var selector int8
 
 func main() {
+	fmt.Print("\033[H\033[2J")
 
 	for {
-
 		conn, err := sql.Open("mssql", connectionString())
 		if err != nil {
 			log.Fatal("Open connection failed:", err.Error())
 		}
 		defer conn.Close()
 
-		fmt.Println("Welcome to the Offset Calculator, what action you want to perform? \n [1] Register a new sensor \n [2] Upload sensor datalogs \n [3] Calculate Offset \n [4] Run a Modbus datalogging (coming soon)")
+		fmt.Println("Welcome to the Offset Calculator, what action do you want to perform? \n [1] Sensors management \n [2] Upload sensor datalogs \n [3] Calculate Offset \n ")
 
 		_, scanErr := fmt.Scanln(&selector)
 		if scanErr != nil {
@@ -29,34 +29,62 @@ func main() {
 
 		switch selector {
 		case 1:
+			fmt.Print("\033[H\033[2J")
 
-			fmt.Println("Registering a new sensor...")
+			fmt.Println("What action do you want to perform? \n [1] Register new sensor in Stock \n [2] Add a new Sensor Type \n [3] Sensor list \n [4] Delete sensor \n [5] Delete sensor type \n ")
 
-			// Mostrar los sensores registrados
-			ids, descripciones, errQuery := queryTipoSensor(connectionString())
-			if errQuery != nil {
-				log.Fatal(errQuery)
+			var case1Selector int8
+			_, scanErr := fmt.Scanln(&case1Selector)
+			if scanErr != nil {
+				log.Fatal("Error reading input:", scanErr)
 			}
-			printResultsTipoSensor(ids, descripciones)
 
-			// Registrar un nuevo sensor
-			errRegister := registerNewSensor(connectionString())
-			if errRegister != nil {
-				log.Fatal(errRegister)
+			switch case1Selector {
+			case 1:
+				fmt.Print("\033[H\033[2J")
+				fmt.Println("Registering a new sensor...")
+				err := registerNewSensor(connectionString())
+				if err != nil {
+					log.Fatal(err)
+				}
+
+			case 2:
+				fmt.Print("\033[H\033[2J")
+				fmt.Println("Registering a new sensor type...")
+				err := registerNewSensorType(connectionString())
+				if err != nil {
+					log.Fatal(err)
+				}
+
+			case 3:
+				fmt.Print("\033[H\033[2J")
+				fmt.Println("Sensor list...")
+				// Mostrar los tipos de sensores registrados
+				ids, descripciones, errQuery := queryTipoSensor(connectionString())
+				if errQuery != nil {
+					log.Fatal(errQuery)
+				}
+				printResultsTipoSensor(ids, descripciones)
+
+			case 4:
+				fmt.Print("\033[H\033[2J")
+			case 5:
+				fmt.Print("\033[H\033[2J")
+			default:
+				fmt.Println("Invalid option selected.")
+				fmt.Print("\033[H\033[2J")
 			}
 
 		case 2:
-			fmt.Println("Uploading sensor datalogs...")
-			// Call a function to handle uploading sensor datalogs.
+			fmt.Println("Upload sensor datalogs...")
+			// Implement uploading sensor datalogs functionality.
+
 		case 3:
 			fmt.Println("Calculating Offset...")
 			// Call a function to handle calculating offset.
-		case 4:
-			fmt.Println("Running Modbus datalogging (coming soon)...")
-			// Provide a message indicating that this feature is not yet implemented.
+
 		default:
 			fmt.Println("Invalid option selected.")
 		}
-
 	}
 }
