@@ -73,6 +73,12 @@ func main() {
 
 			case 4:
 				fmt.Print("\033[H\033[2J")
+				fmt.Println("Insert the serial number to be deleted...")
+				// Prompt for serial number input and delete the sensor
+				err := deleteSensorBySerialNumber(connectionString())
+				if err != nil {
+					log.Fatal(err)
+				}
 
 			case 5:
 				fmt.Print("\033[H\033[2J")

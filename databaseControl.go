@@ -13,23 +13,7 @@ var (
 	server   = flag.String("server", "127.0.0.1", "the database server")
 	port     = flag.Int("port", 1433, "the database port")
 	database = flag.String("database", "sensors", "the database name")
-	/*
-		No se usan porque ingresamos con la autentifiacion de windows
-		////////////////////////////////////////////////////////////////
-		user     = flag.String("user", "", "the database user")
-		password = flag.String("password", "", "the database password")
-
-	*/
 )
-
-/*
-Se usa en caso de autentificarse con usuario
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-func connectionString() string {
-	return fmt.Sprintf("server=%s;database=%s;user id=%s;password=%s;port=%d", *server, *database, *user, *password, *port)
-}
-*/
 
 func parseFlags() {
 	flag.Parse()
@@ -119,6 +103,35 @@ func querySensorView(connectionString string) ([]string, []string, []int, error)
 	}
 
 	return SN, sensorTypes, tipoSensorIDs, nil
+}
+
+func deleteSensorBySerialNumber(connectionString string) error {
+	// Prompt for serial number input
+	fmt.Println("Enter the serial number of the sensor you want to delete:")
+	var serialNumber string
+	_, err := fmt.Scanln(&serialNumber)
+	if err != nil {
+		return err
+	}
+
+	// SQL query string
+	query := fmt.Sprintf("DELETE FROM Sensor WHERE SerialNumber = '%s'", serialNumber)
+
+	// Connect to the SQL Server database
+	db, err := sql.Open("mssql", connectionString)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	// Execute the SQL query
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Sensor with Serial Number %s deleted successfully\n", serialNumber)
+	return nil
 }
 
 func printResultsTipoSensor(ids []int, descripciones []string) {
