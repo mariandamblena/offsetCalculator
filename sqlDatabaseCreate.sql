@@ -29,10 +29,12 @@ go
 -- Crear tabla Datalog
 CREATE TABLE Datalog (
     Timestamp DATETIME,
-    Value FLOAT,
+    Value1 FLOAT,
+    Value2 FLOAT,
     SensorSerialNumber VARCHAR(50),
     FOREIGN KEY (SensorSerialNumber) REFERENCES Sensor(SerialNumber)
 );
+
 go
 INSERT INTO TipoSensor (id, Descripcion)
 VALUES

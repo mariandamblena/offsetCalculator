@@ -256,3 +256,32 @@ func registerNewSensor(connectionString string) error {
 	fmt.Println("Sensor registered successfully")
 	return nil
 }
+
+func deleteTipoSensorByID(connectionString string) error {
+	// Prompt for sensor type ID input
+	fmt.Println("Enter the ID of the sensor type you want to delete:")
+	var tipoSensorID int
+	_, err := fmt.Scanln(&tipoSensorID)
+	if err != nil {
+		return err
+	}
+
+	// SQL query string
+	query := fmt.Sprintf("DELETE FROM TipoSensor WHERE id = %d", tipoSensorID)
+
+	// Connect to the SQL Server database
+	db, err := sql.Open("mssql", connectionString)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	// Execute the SQL query
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Sensor type with ID %d deleted successfully\n", tipoSensorID)
+	return nil
+}
