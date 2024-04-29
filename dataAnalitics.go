@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"strconv"
 	"strings"
@@ -45,7 +46,6 @@ func insertDataIntoDatalog(connectionString string, dataset []Data, serialNumber
 	return nil
 }
 
-// convertExcelDataToDataset convierte los datos del archivo Excel al formato de datos requerido
 func convertExcelDataToDataset(file *xlsx.File) []Data {
 	var dataset []Data
 
@@ -63,23 +63,37 @@ func convertExcelDataToDataset(file *xlsx.File) []Data {
 			humStr := row.Cells[2].String()       // Humedad
 			tempStr := row.Cells[3].String()      // Temperatura
 
-			// Convertir la cadena de fecha y hora a un objeto time.Time
-			timestamp, err := time.Parse("2/1/06 15:04", timestampStr)
+			// Convertir el timestamp de Excel a time.Time
+			timestampDecimal, err := strconv.ParseFloat(timestampStr, 64)
 			if err != nil {
 				log.Printf("Error parsing timestamp at row %d: %v", rowIndex+1, err)
 				continue
 			}
-
-			// Convertir las cadenas de humedad y temperatura a flotantes
-			hum, err := strconv.ParseFloat(strings.Replace(humStr, ",", ".", -1), 64)
+			timestamp, err := convertDecimalToTime(timestampDecimal)
 			if err != nil {
-				log.Printf("Error parsing humidity at row %d: %v", rowIndex+1, err)
+				log.Printf("Error converting timestamp at row %d: %v", rowIndex+1, err)
 				continue
 			}
-			temp, err := strconv.ParseFloat(strings.Replace(tempStr, ",", ".", -1), 64)
-			if err != nil {
-				log.Printf("Error parsing temperature at row %d: %v", rowIndex+1, err)
-				continue
+
+			// Manejar los valores de humedad y temperatura no válidos
+			var hum, temp float64
+			if humStr == "----" || tempStr == "----" {
+				// Si los valores son '----', establecer a un valor predeterminado o manejar según sea necesario
+				hum = 0.0  // Valor predeterminado para humedad
+				temp = 0.0 // Valor predeterminado para temperatura
+			} else {
+				// Convertir las cadenas de humedad y temperatura a flotantes
+				var err error
+				hum, err = strconv.ParseFloat(strings.Replace(humStr, ",", ".", -1), 64)
+				if err != nil {
+					log.Printf("Error parsing humidity at row %d: %v", rowIndex+1, err)
+					continue
+				}
+				temp, err = strconv.ParseFloat(strings.Replace(tempStr, ",", ".", -1), 64)
+				if err != nil {
+					log.Printf("Error parsing temperature at row %d: %v", rowIndex+1, err)
+					continue
+				}
 			}
 
 			// Crear un nuevo punto de datos y agregarlo al conjunto de datos
@@ -93,4 +107,57 @@ func convertExcelDataToDataset(file *xlsx.File) []Data {
 	}
 
 	return dataset
+}
+
+func convertDecimalToTime(decimal float64) (time.Time, error) {
+	// Extraer la parte entera y decimal
+	days := int(decimal)
+	fractionalPart := decimal - float64(days)
+
+	// Convertir la parte decimal a horas, minutos y segundos
+	secondsInDay := int(fractionalPart * 86400) // 86400 segundos en un día
+	hours := secondsInDay / 3600
+	secondsInDay %= 3600
+	minutes := secondsInDay / 60
+	seconds := secondsInDay % 60
+
+	// Construir la fecha y hora
+	referenceDate := time.Date(1899, 12, 30, 0, 0, 0, 0, time.UTC) // Fecha de referencia de Excel
+	targetDate := referenceDate.AddDate(0, 0, days).Add(time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds)*time.Second)
+
+	return targetDate, nil
+}
+
+func listFilesInFolder(folderPath string) ([]string, error) {
+	files, err := ioutil.ReadDir(folderPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var fileNames []string
+	for _, file := range files {
+		fileNames = append(fileNames, file.Name())
+	}
+	return fileNames, nil
+}
+
+func selectFileByIndex(fileNames []string) (string, error) {
+	fmt.Println("Select a file by entering its index:")
+	for i, name := range fileNames {
+		fmt.Printf("[%d] %s\n", i+1, name)
+	}
+
+	var selectedIndex int
+	fmt.Print("Enter the index of the file: ")
+	_, err := fmt.Scanln(&selectedIndex)
+	if err != nil {
+		return "", err
+	}
+
+	if selectedIndex < 1 || selectedIndex > len(fileNames) {
+		return "", fmt.Errorf("invalid index")
+	}
+
+	selectedFileName := fileNames[selectedIndex-1]
+	return selectedFileName, nil
 }

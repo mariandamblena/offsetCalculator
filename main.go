@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"path/filepath"
 
 	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/tealeg/xlsx"
@@ -107,15 +108,25 @@ func main() {
 			}
 
 		case 2:
-			fmt.Print("\033[H\033[2J")
-			fmt.Println("Upload sensor datalogs...")
-			// Solicitar al usuario que ingrese la ruta del archivo Excel
-			var filePath string
-			fmt.Print("Enter the path to the Excel file: ")
-			fmt.Scanln(&filePath)
+			defaultFolderPath := `C:\Users\maria\OneDrive\Documents\proyectos\offsetCalculator`
+
+			// Listar archivos en la carpeta por defecto
+			fileNames, err := listFilesInFolder(defaultFolderPath)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			// Seleccionar un archivo por su índice
+			selectedFileName, err := selectFileByIndex(fileNames)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			// Obtener la ruta completa del archivo seleccionado
+			selectedFilePath := filepath.Join(defaultFolderPath, selectedFileName)
 
 			// Leer el archivo Excel
-			xlFile, err := xlsx.OpenFile(filePath)
+			xlFile, err := xlsx.OpenFile(selectedFilePath)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -123,9 +134,15 @@ func main() {
 			// Convertir los datos del archivo Excel al formato de datos requerido
 			dataset := convertExcelDataToDataset(xlFile)
 
-			// Imprimir el conjunto de datos convertido
-			for _, data := range dataset {
-				fmt.Printf("Timestamp: %s, Value1: %.2f, Value2: %.2f\n", data.Timestamp, data.Value1, data.Value2)
+			// Solicitar al usuario que ingrese el número de serie del sensor
+			var serialNumber string
+			fmt.Print("Enter the serial number of the sensor: ")
+			fmt.Scanln(&serialNumber)
+
+			// Insertar los datos del dataset en la tabla Datalog
+			err = insertDataIntoDatalog(connectionString(), dataset, serialNumber)
+			if err != nil {
+				log.Fatal(err)
 			}
 		case 3:
 			fmt.Println("Calculating Offset...")
